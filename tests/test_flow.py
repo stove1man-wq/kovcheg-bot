@@ -133,3 +133,26 @@ def test_sqlite_roundtrip(tmp_path):
     assert p.consent is True and p.tag == "pro_docs"
     assert store.stats() == {"pro_docs": 1}
     assert store.delete(1) is True and store.get(1) is None
+
+
+def test_recent_applications_newest_first():
+    flow, _ = make()
+    for uid in (1, 2):
+        u = User(uid, "u%d" % uid)
+        flow.start(u)
+        flow.button(u, "ok")
+        flow.button(u, "seg:human")
+        flow.button(u, "p:home")
+        flow.button(u, "a:home:0")
+        flow.button(u, "f:call")
+    assert [a.uid for a in flow.store.recent_applications(5)] == [2, 1]
+
+
+def test_mail_message_has_key_fields():
+    from kovcheg_bot.config import Config
+    from kovcheg_bot.mailer import build_message
+    from kovcheg_bot.flow import Application
+    cfg = Config(token="x", mail_to="to@example.org", mail_from="from@example.org")
+    msg = build_message(Application(1, "ivan", "order", "b2b_gateway", "site_docs", "Нужен API", "@ivan", 0.0), cfg)
+    body = msg.get_content()
+    assert "b2b_gateway" in msg["Subject"] and "Нужен API" in body and "@ivan" in body

@@ -30,6 +30,9 @@ class MemoryStore:
     def add_application(self, app: Application) -> None:
         self.applications.append(app)
 
+    def recent_applications(self, n: int = 10) -> List[Application]:
+        return list(reversed(self.applications[-n:]))
+
     def stats(self) -> Dict[str, int]:
         result: Dict[str, int] = {}
         for p in self.profiles.values():
@@ -83,6 +86,11 @@ class SqliteStore:
         with self._lock, self._db:
             self._db.execute("INSERT INTO applications (%s) VALUES (%s)" % (",".join(_APP_COLUMNS), ",".join("?" for _ in _APP_COLUMNS)),
                              [values[c] for c in _APP_COLUMNS])
+
+    def recent_applications(self, n: int = 10) -> List[Application]:
+        with self._lock:
+            rows = self._db.execute("SELECT * FROM applications ORDER BY id DESC LIMIT ?", (n,)).fetchall()
+        return [Application(**{c: r[c] for c in _APP_COLUMNS}) for r in rows]
 
     def stats(self) -> Dict[str, int]:
         with self._lock:
