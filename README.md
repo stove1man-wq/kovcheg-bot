@@ -21,6 +21,8 @@
 3. Откройте `.env` в блокноте, впишите `BOT_TOKEN`, свой `ADMIN_ID` (узнать у бота @userinfobot), `POLICY_URL`, при желании почту.
 4. Запуск: `.venv\Scripts\python -m kovcheg_bot`
 
+На сервере бот ставится и обновляется одной командой: `bash deploy.sh` (при первом запуске спросит токен, ADMIN_ID и ссылку на политику; токен нигде не светится).
+
 Для работы 24/7 бот должен жить на сервере (VPS), а не на ноутбуке. Есть `Dockerfile`:
 `docker build -t kovcheg-bot .` и `docker run -d --restart=always --env-file .env -v kovcheg-data:/data kovcheg-bot`.
 
